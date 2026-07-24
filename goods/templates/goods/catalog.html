@@ -1,5 +1,6 @@
 {% extends "main/base.html" %} 
-{% load static %} 
+{% load static %}
+{% load goods_tags %}
 
 
 {% block content %}
@@ -16,7 +17,7 @@
     </button>
 
     <form
-      action=""
+      action="{% url "catalog:index" slug_url %}"
       method="get"
       class="dropdown-menu bg-dark"
       data-bs-theme="dark"
@@ -28,8 +29,9 @@
           name="on_sale"
           id="flexCheckDefault"
           value="on"
-        />
-        <input type="hidden" name="q" value="request.GET.q" />
+          {% if request.GET.on_sale == 'on' %}checked{% endif %}
+          >
+        {% comment %} <input type="hidden" name="q" value="request.GET.q" /> {% endcomment %}
         <label class="form-check-label" for="flexCheckDefault">
           Товары по акции
         </label>
@@ -55,7 +57,8 @@
           name="order_by"
           id="flexRadioDefault2"
           value="price"
-        />
+          {% if request.GET.order_by == 'price' %}checked{% endif %}
+        >
         <label class="form-check-label" for="flexRadioDefault2">
           От дешевых к дорогим
         </label>
@@ -67,7 +70,8 @@
           name="order_by"
           id="flexRadioDefault3"
           value="-price"
-        />
+          {% if request.GET.order_by == '-price' %}checked{% endif %}
+          >
         <label class="form-check-label" for="flexRadioDefault3">
           От дорогих к дешевым
         </label>
@@ -112,7 +116,7 @@
             <p><strong>{{product.sell_price}} $</strong></p>
             <span class="badge bg-warning text-dark">Скидка {{product.discount}} %</span>
           {% else %}
-            <p><strong>{{ product.price }}</strong></p>
+            <p><strong>{{ product.price }} $</strong></p>
           {% endif %}
           
           <a href="#" class="btn add-to-cart">
@@ -141,16 +145,14 @@
     <div class="custom-shadow d-flex">
 
       <li class="page-item {% if not goods.has_previous %}disabled{% endif %}">
-        <a class="page-link" href="{% if goods.has_previous %} ?page={{goods.previous_page_number}} {% else %} 
-          # 
-        {% endif %}"> Назад </a>
+        <a class="page-link" href="{% if goods.has_previous %} ?{% change_params page=goods.previous_page_number %} {% else %} # {% endif %}"> Назад </a>
       </li>
 
       
       {% for page in goods.paginator.page_range %}
         {% if page >= goods.number|add:-2 and page <= goods.number|add:2 %}
           <li class="page-item {% if goods.number == page %} active {% endif %}">
-            <a class="page-link" href="?page={{page}}">{{page}}</a>
+            <a class="page-link" href="?{% change_params page=page %}">{{page}}</a>
           </li>
         {% endif %}
       {% endfor %}
@@ -158,7 +160,7 @@
           
       
       <li class="page-item {% if not goods.has_next %}disabled{% endif %}">
-        <a class="page-link" href="{% if goods.has_next %} ?page={{goods.next_page_number}} {% else %} # {% endif %}"> Следующая </a>
+        <a class="page-link" href="{% if goods.has_next %}?{% change_params page=goods.next_page_number %}{% else %} # {% endif %}"> Следующая </a>
       </li>
     </div>
   </ul>
